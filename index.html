@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estrategia Ruleta Digital - Animalitos</title>
+<style>
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f5f5f5;
+    color: #333;
+}
+h1 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 30px;
+}
+.container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+.control-panel {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+button:hover {
+    background-color: #2980b9;
+}
+select {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+.result-input {
+    margin-bottom: 20px;
+}
+input {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    width: 50px;
+    text-align: center;
+}
+.predictions {
+    margin-top: 30px;
+}
+.prediction-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 5px;
+}
+.calientes {
+    background-color: #ffecec;
+    border-left: 5px solid #e74c3c;
+}
+.tibios {
+    background-color: #fff4e5;
+    border-left: 5px solid #f39c12;
+}
+.rezagados {
+    background-color: #e8f4f8;
+    border-left: 5px solid #3498db;
+}
+.number-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+.number-item {
+    background-color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 50px;
+}
+.number {
+    font-size: 18px;
+    color: #2c3e50;
+}
+.animal {
+    font-size: 12px;
+    color: #7f8c8d;
+    text-align: center;
+}
+.history {
+    margin-top: 30px;
+}
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    align-items: center;
+}
+.history-item:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+.delete-btn {
+    background-color: #e74c3c;
+    padding: 5px 10px;
+    font-size: 12px;
+}
+.delete-btn:hover {
+    background-color: #c0392b;
+}
+.stats {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #7f8c8d;
+}
+.history-predictions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 5px;
+    font-size: 12px;
+}
+.history-prediction-item {
+    background-color: #eee;
+    padding: 2px 5px;
+    border-radius: 3px;
+}
+.no-predictions {
+    color: #999;
+    font-style: italic;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Estrategia Ruleta Digital - Animalitos</h1>
+    
+    <div class="result-input">
+        <h3>Registrar Resultado Actual</h3>
+        <div>
+            <label for="result-number">Número:</label>
+            <input type="text" id="result-number" placeholder="0-36 o 00">
+            <button id="register-btn">Registrar</button>
+        </div>
+    </div>
+    
+    <div class="control-panel">
+        <div>
+            <label for="strategy-type">Tipo de estrategia:</label>
+            <select id="strategy-type">
+                <option value="dynamic">Dinámica (se adapta)</option>
+                <option value="fixed">Fija (mismos números)</option>
+                <option value="auto">Automática (hasta ganar)</option>
+            </select>
+        </div>
+        <button id="clear-btn">Limpiar Todo</button>
+    </div>
+    
+    <div class="predictions">
+        <h2>Pronóstico Actual</h2>
+        
+        <div class="prediction-section calientes">
+            <h3>5 Números Calientes</h3>
+            <div class="number-list" id="hot-numbers">
+                <div class="no-predictions">Registra un resultado para generar pronósticos</div>
+            </div>
+        </div>
+        
+        <div class="prediction-section tibios">
+            <h3>3 Números Tibios</h3>
+            <div class="number-list" id="warm-numbers">
+                <div class="no-predictions">Registra un resultado para generar pronósticos</div>
+            </div>
+        </div>
+        
+        <div class="prediction-section rezagados">
+            <h3>2 Números Rezagados</h3>
+            <div class="number-list" id="cold-numbers">
+                <div class="no-predictions">Registra un resultado para generar pronósticos</div>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <p>Total de sorteos registrados: <span id="total-count">0</span></p>
+            <p>Último número registrado: <span id="last-number">Ninguno</span></p>
+        </div>
+    </div>
+    
+    <div class="history">
+        <h2>Historial de Resultados</h2>
+        <div id="history-list">
+            <div class="no-predictions">No hay resultados registrados</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Datos iniciales de los animalitos
+    const animalitos = {
+        0: "DELFÍN",
+        1: "CARNERO",
+        2: "TORO",
+        3: "CIEMPIÉS",
+        4: "ALACRÁN",
+        5: "LEÓN",
+        6: "RANA",
+        7: "PERICO",
+        8: "RATÓN",
+        9: "ÁGUILA",
+        10: "TIGRE",
+        11: "GATO",
+        12: "CABALLO",
+        13: "MONO",
+        14: "PALOMA",
+        15: "ZORRO",
+        16: "OSO",
+        17: "PAVO",
+        18: "BURRO",
+        19: "CHIVO",
+        20: "CERDO",
+        21: "GALLO",
+        22: "CAMELLO",
+        23: "CEBRA",
+        24: "IGUANA",
+        25: "GALLINA",
+        26: "VACA",
+        27: "PERRO",
+        28: "ZAMURO",
+        29: "ELEFANTE",
+        30: "CAIMÁN",
+        31: "LAPA",
+        32: "ARDILLA",
+        33: "PESCADO",
+        34: "VENADO",
+        35: "JIRAFA",
+        36: "CULEBRA",
+        37: "BALLENA" // 00 se manejará como 37 internamente
+    };
+
+    // Frecuencia histórica actualizada según el análisis proporcionado
+    let frequencyData = {
+        // Top 10 Calientes (los que más salen)
+        16: 35, // OSO
+        9: 30,  // ÁGUILA
+        20: 28, // CERDO
+        24: 27, // IGUANA
+        0: 26,  // DELFÍN
+        13: 25, // MONO
+        22: 25, // CAMELLO
+        35: 24, // JIRAFA
+        10: 23, // TIGRE
+        19: 22, // CHIVO
+        
+        // Top 10 Intermedios (los que a veces salen)
+        8: 20,  // RATÓN
+        29: 19, // ELEFANTE
+        31: 19, // LAPA
+        34: 18, // VENADO
+        5: 17,  // LEÓN
+        12: 17, // CABALLO
+        25: 17, // GALLINA
+        27: 16, // PERRO
+        2: 15,  // TORO
+        30: 15, // CAIMÁN
+        
+        // Rezagados (los que menos salen)
+        1: 14,  // CARNERO
+        3: 13,  // CIEMPIÉS
+        4: 12,  // ALACRÁN
+        6: 12,  // RANA
+        7: 11,  // PERICO
+        11: 11, // GATO
+        14: 11, // PALOMA
+        15: 10, // ZORRO
+        17: 9,  // PAVO
+        18: 8,  // BURRO
+        21: 8,  // GALLO
+        23: 7,  // CEBRA
+        26: 7,  // VACA
+        28: 6,  // ZAMURO
+        32: 6,  // ARDILLA
+        33: 5,  // PESCADO
+        36: 5,  // CULEBRA
+        37: 4   // BALLENA (00)
+    };
+
+    // Historial de resultados y pronósticos
+    let resultsHistory = JSON.parse(localStorage.getItem('ruletaResults')) || [];
+    let predictionsHistory = JSON.parse(localStorage.getItem('ruletaPredictions')) || [];
+
+    // Elementos del DOM
+    const resultNumberInput = document.getElementById('result-number');
+    const registerBtn = document.getElementById('register-btn');
+    const strategyType = document.getElementById('strategy-type');
+    const clearBtn = document.getElementById('clear-btn');
+    const hotNumbersDiv = document.getElementById('hot-numbers');
+    const warmNumbersDiv = document.getElementById('warm-numbers');
+    const coldNumbersDiv = document.getElementById('cold-numbers');
+    const historyList = document.getElementById('history-list');
+    const totalCountSpan = document.getElementById('total-count');
+    const lastNumberSpan = document.getElementById('last-number');
+
+    // Inicializar la página
+    function initPage() {
+        updateHistoryDisplay();
+        if (resultsHistory.length > 0) {
+            const lastPrediction = predictionsHistory[predictionsHistory.length - 1];
+            displayCurrentPrediction(lastPrediction || generatePredictionData());
+        }
+    }
+
+    // Registrar nuevo resultado
+    function registerNumber() {
+        let number = resultNumberInput.value.trim();
+        
+        // Manejar el caso de 00 (lo convertimos a 37 internamente)
+        if (number === '00') {
+            number = '37';
+        }
+        
+        // Validar el número
+        if (number === '') {
+            alert('Por favor ingresa un número');
+            return false;
+        }
+        
+        const numValue = parseInt(number);
+        if (isNaN(numValue)) {
+            alert('Por favor ingresa un número válido');
+            return false;
+        }
+        
+        if (!(numValue in animalitos) && numValue !== 37) {
+            alert('Por favor ingresa un número válido (0-36 o 00)');
+            return false;
+        }
+        
+        resultsHistory.push(numValue);
+        
+        // Actualizar frecuencia (si el número no existe en los datos, se agrega con 1)
+        frequencyData[numValue] = (frequencyData[numValue] || 0) + 1;
+        
+        // Generar nuevo pronóstico
+        const newPrediction = generatePredictionData();
+        predictionsHistory.push(newPrediction);
+        
+        // Guardar en localStorage
+        localStorage.setItem('ruletaResults', JSON.stringify(resultsHistory));
+        localStorage.setItem('ruletaPredictions', JSON.stringify(predictionsHistory));
+        
+        updateHistoryDisplay();
+        displayCurrentPrediction(newPrediction);
+        
+        resultNumberInput.value = '';
+        resultNumberInput.focus();
+        return true;
+    }
+
+    // Limpiar todo
+    clearBtn.addEventListener('click', () => {
+        if (confirm('¿Estás seguro de que quieres borrar todo el historial y pronósticos?')) {
+            resultsHistory = [];
+            predictionsHistory = [];
+            localStorage.removeItem('ruletaResults');
+            localStorage.removeItem('ruletaPredictions');
+            
+            // Restablecer la visualización
+            hotNumbersDiv.innerHTML = '<div class="no-predictions">Registra un resultado para generar pronósticos</div>';
+            warmNumbersDiv.innerHTML = '<div class="no-predictions">Registra un resultado para generar pronósticos</div>';
+            coldNumbersDiv.innerHTML = '<div class="no-predictions">Registra un resultado para generar pronósticos</div>';
+            updateHistoryDisplay();
+            totalCountSpan.textContent = '0';
+            lastNumberSpan.textContent = 'Ninguno';
+        }
+    });
+
+    // Generar datos de pronóstico (evitando repetición de números recientes)
+    function generatePredictionData() {
+        const strategy = strategyType.value;
+        
+        // Obtener números que ya han salido (últimos 15 para evitar repetición)
+        const alreadyAppeared = [...resultsHistory].slice(-15);
+        
+        // Clasificar números por frecuencia
+        const allNumbers = Object.keys(frequencyData).map(Number);
+        
+        // Ordenar por frecuencia (mayor a menor)
+        allNumbers.sort((a, b) => frequencyData[b] - frequencyData[a]);
+        
+        // Separar en calientes, tibios y rezagados
+        const hotNumbers = allNumbers.slice(0, 12); // Top 12 calientes
+        const warmNumbers = allNumbers.slice(12, 24); // Siguientes 12 (tibios)
+        const coldNumbers = allNumbers.slice(24); // Resto (rezagados)
+        
+        // Filtrar números que no han aparecido recientemente
+        let availableHot = hotNumbers.filter(num => !alreadyAppeared.includes(num));
+        let availableWarm = warmNumbers.filter(num => !alreadyAppeared.includes(num));
+        let availableCold = coldNumbers.filter(num => !alreadyAppeared.includes(num));
+        
+        // Si no hay suficientes disponibles, intentar con menos restricciones
+        if (availableHot.length < 5) {
+            // Reducir el rango de números recientes a considerar
+            const lessRecentAppeared = [...resultsHistory].slice(-10);
+            availableHot = hotNumbers.filter(num => !lessRecentAppeared.includes(num));
+        }
+        
+        if (availableWarm.length < 3) {
+            const lessRecentAppeared = [...resultsHistory].slice(-10);
+            availableWarm = warmNumbers.filter(num => !lessRecentAppeared.includes(num));
+        }
+        
+        if (availableCold.length < 2) {
+            const lessRecentAppeared = [...resultsHistory].slice(-10);
+            availableCold = coldNumbers.filter(num => !lessRecentAppeared.includes(num));
+        }
+        
+        // Si aún no hay suficientes, usar todos los disponibles sin filtro (último recurso)
+        if (availableHot.length < 5) availableHot = hotNumbers;
+        if (availableWarm.length < 3) availableWarm = warmNumbers;
+        if (availableCold.length < 2) availableCold = coldNumbers;
+        
+        // Seleccionar los números para el pronóstico
+        let selectedHot, selectedWarm, selectedCold;
+        
+        if (strategy === 'fixed') {
+            // Estrategia fija: siempre los mismos números (top histórico) que no hayan salido
+            selectedHot = hotNumbers.filter(num => !alreadyAppeared.includes(num)).slice(0, 5);
+            selectedWarm = warmNumbers.filter(num => !alreadyAppeared.includes(num)).slice(0, 3);
+            selectedCold = coldNumbers.filter(num => !alreadyAppeared.includes(num)).slice(0, 2);
+        } else if (strategy === 'auto') {
+            // Estrategia automática: mantiene pronósticos hasta ganar, luego cambia a dinámico
+            
+            // Si no hay pronósticos previos, generar unos nuevos (modo fijo inicial)
+            if (predictionsHistory.length === 0) {
+                selectedHot = selectRandomUnique(availableHot, 5);
+                selectedWarm = selectRandomUnique(availableWarm, 3);
+                selectedCold = selectRandomUnique(availableCold, 2);
+            } else {
+                // Obtener el último resultado y el último pronóstico
+                const lastResult = resultsHistory[resultsHistory.length - 1];
+                const lastPrediction = predictionsHistory[predictionsHistory.length - 1];
+                
+                // Verificar si el último resultado coincide con algún número del pronóstico
+                const allPredictedNumbers = [...lastPrediction.hot, ...lastPrediction.warm, ...lastPrediction.cold];
+                const won = allPredictedNumbers.includes(lastResult);
+                
+                if (won) {
+                    // Si ganamos, generamos nuevos pronósticos (modo dinámico)
+                    selectedHot = selectRandomUnique(availableHot, 5);
+                    selectedWarm = selectRandomUnique(availableWarm, 3);
+                    selectedCold = selectRandomUnique(availableCold, 2);
+                } else {
+                    // Si perdimos, mantenemos los mismos pronósticos
+                    return lastPrediction;
+                }
+            }
+        } else {
+            // Estrategia dinámica por defecto: selecciona aleatoriamente de los disponibles
+            selectedHot = selectRandomUnique(availableHot, 5);
+            selectedWarm = selectRandomUnique(availableWarm, 3);
+            selectedCold = selectRandomUnique(availableCold, 2);
+        }
+        
+        // Asegurarse de que no se repitan números entre los pronósticos
+        const allSelected = [...selectedHot, ...selectedWarm, ...selectedCold];
+        const uniqueSelected = [...new Set(allSelected)];
+        
+        if (uniqueSelected.length < allSelected.length) {
+            // Si hay duplicados, regenerar los pronósticos
+            return generatePredictionData();
+        }
+        
+        return {
+            hot: selectedHot,
+            warm: selectedWarm,
+            cold: selectedCold,
+            timestamp: new Date().toISOString()
+        };
+    }
+
+    // Mostrar el pronóstico actual
+    function displayCurrentPrediction(prediction) {
+        displayNumbers(prediction.hot, hotNumbersDiv);
+        displayNumbers(prediction.warm, warmNumbersDiv);
+        displayNumbers(prediction.cold, coldNumbersDiv);
+        
+        // Actualizar estadísticas
+        totalCountSpan.textContent = resultsHistory.length;
+        lastNumberSpan.textContent = resultsHistory.length > 0 ? 
+            `${resultsHistory[resultsHistory.length - 1] === 37 ? '00' : resultsHistory[resultsHistory.length - 1]} - ${animalitos[resultsHistory[resultsHistory.length - 1]]}` : 
+            'Ninguno';
+    }
+
+    // Mostrar números en el DOM
+    function displayNumbers(numbers, container) {
+        container.innerHTML = '';
+        
+        if (!numbers || numbers.length === 0) {
+            container.innerHTML = '<div class="no-predictions">No hay pronósticos generados</div>';
+            return;
+        }
+        
+        numbers.forEach(num => {
+            const numberItem = document.createElement('div');
+            numberItem.className = 'number-item';
+            
+            const numberSpan = document.createElement('span');
+            numberSpan.className = 'number';
+            numberSpan.textContent = num === 37 ? '00' : num; // Mostrar 00 correctamente
+            
+            const animalSpan = document.createElement('span');
+            animalSpan.className = 'animal';
+            animalSpan.textContent = animalitos[num];
+            
+            numberItem.appendChild(numberSpan);
+            numberItem.appendChild(animalSpan);
+            container.appendChild(numberItem);
+        });
+    }
+
+    // Actualizar el historial en el DOM
+    function updateHistoryDisplay() {
+        historyList.innerHTML = '';
+        
+        if (resultsHistory.length === 0) {
+            historyList.innerHTML = '<div class="no-predictions">No hay resultados registrados</div>';
+            return;
+        }
+        
+        // Mostrar en orden inverso (los más recientes primero)
+        for (let i = resultsHistory.length - 1; i >= 0; i--) {
+            const num = resultsHistory[i];
+            const prediction = predictionsHistory[i];
+            
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            
+            const infoDiv = document.createElement('div');
+            infoDiv.innerHTML = `
+                <div><strong>${num === 37 ? '00' : num} - ${animalitos[num]}</strong></div>
+                ${prediction ? `
+                <div class="history-predictions">
+                    <span>Pronóstico:</span>
+                    ${prediction.hot.map(n => `<span class="history-prediction-item caliente">${n === 37 ? '00' : n}</span>`).join('')}
+                    ${prediction.warm.map(n => `<span class="history-prediction-item tibio">${n === 37 ? '00' : n}</span>`).join('')}
+                    ${prediction.cold.map(n => `<span class="history-prediction-item rezagado">${n === 37 ? '00' : n}</span>`).join('')}
+                </div>
+                ` : '<div class="no-predictions">Sin pronóstico</div>'}
+            `;
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.textContent = 'Eliminar';
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                
+                // Eliminar este elemento del historial
+                resultsHistory.splice(i, 1);
+                predictionsHistory.splice(i, 1);
+                
+                localStorage.setItem('ruletaResults', JSON.stringify(resultsHistory));
+                localStorage.setItem('ruletaPredictions', JSON.stringify(predictionsHistory));
+                
+                updateHistoryDisplay();
+                
+                // Si era el último, limpiar también el pronóstico actual
+                if (resultsHistory.length === 0) {
+                    hotNumbersDiv.innerHTML = '<div class="no-predictions">Registra un resultado para generar pronósticos</div>';
+                    warmNumbersDiv.innerHTML = '<div class="no-predictions">Registra un resultado para generar pronósticos</div>';
+                    coldNumbersDiv.innerHTML = '<div class="no-predictions">Registra un resultado para generar pronósticos</div>';
+                    totalCountSpan.textContent = '0';
+                    lastNumberSpan.textContent = 'Ninguno';
+                } else if (i === resultsHistory.length) {
+                    // Si eliminamos el último, mostrar el nuevo último pronóstico
+                    displayCurrentPrediction(predictionsHistory[predictionsHistory.length - 1]);
+                }
+            });
+            
+            historyItem.appendChild(infoDiv);
+            historyItem.appendChild(deleteBtn);
+            historyList.appendChild(historyItem);
+        }
+    }
+
+    // Función auxiliar para seleccionar elementos únicos aleatorios de un array
+    function selectRandomUnique(array, count) {
+        const shuffled = [...array].sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, count);
+    }
+
+    // Event listeners
+    registerBtn.addEventListener('click', registerNumber);
+    
+    // Permitir registrar con Enter
+    resultNumberInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            registerNumber();
+        }
+    });
+    
+    // Inicializar la página al cargar
+    document.addEventListener('DOMContentLoaded', initPage);
+</script>
+</body>
+</html>
